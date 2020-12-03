@@ -1,5 +1,6 @@
 (ns chouser.day01
-  (:require [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [clojure.core.protocols :as p]))
 
 ;; Find a pair of numbers from the set whose sum is 2020
 
