@@ -28,7 +28,8 @@ def m3:
     | ($x.a * $x.b * (2020 - $x.a - $x.b))
   ][0];
 
-[1721, 979, 366, 299, 675, 1456] | m2 | {"should be 514579": .} | debug | empty ,
-$input | m2 | {"part 1 answer": .} | debug | empty ,
-$input | m3 | {"part 2 answer": .} | debug | empty
-
+{
+  "should be 514579": [1721, 979, 366, 299, 675, 1456] | m2,
+  "part 1 answer": $input | m2,
+  "part 2 answer": $input | m3
+}
