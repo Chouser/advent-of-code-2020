@@ -45,17 +45,18 @@
         (= op '*) (* (werval a) (werval (list* b more)))))))
 
 #_
-(transduce (comp
-            (map #(str "(" % ")"))
-            (map read-string)
-            (map werval))
-           +
-           (line-coll "resources/day18-input.txt"))
-
-#_
 (do
   (assert (= (werval '(1 + (2 * 3) + (4 * (5 + 6)))) 51))
   (assert (= (werval '(2 * 3 + (4 * 5))) 46))
   (assert (= (werval '(5 + (8 * 3 + 9 + 3 * 4 * 3))) 1445))
   (assert (= (werval '(5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4)))) 669060))
   (assert (= (werval '(((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2)) 23340)))
+
+#_
+(transduce (comp
+            (map #(str "(" % ")"))
+            (map read-string)
+            (map werval))
+           +
+           (line-coll "resources/day18-input.txt"))
+;;=> 88500956630893
