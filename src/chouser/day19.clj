@@ -135,5 +135,56 @@ aaaabbb" (str/split #"\n") rest))
         rules (merge rules rules-patch)]
     (transduce (filter #(some empty? (match rules 0 %))) counting msgs)))
 
-#_(count-patched-matches (line-coll "resources/day19-input.txt"))
+#_(time (count-patched-matches (line-coll "resources/day19-input.txt")))
+;; "Elapsed time: 1174.415641 msecs"
 ;;=> 301
+
+
+(defn time-count-patched-matches [lines]
+  (let [{:keys [rules msgs]} (parse-input lines)
+        rules (merge rules rules-patch)]
+    (dotimes [_ 10]
+      (time (transduce (filter #(some empty? (match rules 0 %)))
+                       counting msgs)))))
+
+#_(time-count-patched-matches (line-coll "resources/day19-input.txt"))
+;; "Elapsed time: 1173.281921 msecs" ;; So parsing doesn't take long.
+
+(declare compile-rule)
+
+(defn compile-ref [rule]
+  (if (int? rule)
+    (symbol (str "rule-" rule))
+    `(fn [~'msg] ~(compile-rule rule))))
+
+(defn compile-rule [rule]
+  (cond
+    (int? rule) (list (compile-ref rule) 'msg)
+    (char? rule) `(if (= ~rule (first ~'msg))
+                    (list (rest ~'msg))
+                    ())
+    (set? rule) `(concat ~@(map compile-rule rule))
+    (vector? rule) (reduce
+                     (fn [form subrule]
+                       `(mapcat ~(compile-ref subrule) ~form))
+                     (compile-rule (first rule))
+                     (rest rule))
+    (map? rule) `(fn ~'rmap [~'msg]
+                   (letfn ~(mapv (fn [[id rule]]
+                                   (list (compile-ref id)
+                                         ['msg]
+                                         (compile-rule rule))) rule)
+                     (~'rule-0 ~'msg)))))
+
+(defn time-count-patched-compiled-matches [lines]
+  (let [{:keys [rules msgs]} (parse-input lines)
+        rules (merge rules rules-patch)
+        form (compile-rule rules)
+        _ (clojure.pprint/pprint form)
+        matcher (eval form)]
+    (dotimes [_ 20]
+      (time (transduce (filter #(some empty? (matcher %)))
+                       counting msgs)))))
+
+#_(time-count-patched-compiled-matches (line-coll "resources/day19-input.txt"))
+;; "Elapsed time: 335.336797 msecs"
