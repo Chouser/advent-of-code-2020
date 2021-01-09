@@ -75,9 +75,8 @@
   (get-id [this])
   (get-prev [this])
   (get-next [this])
-  (set-prev! [this x])
-  (set-next! [this x])
 
+  (init! [this] "set next and prev to self")
   (remove3! [this] "returns the 3 cells removed")
   (insert-after! [this subring] "inserts subring after this"))
 
@@ -86,8 +85,11 @@
   (get-id [this] id)
   (get-prev [this] prev)
   (get-next [this] next)
-  (set-prev! [this x] (set! prev x))
-  (set-next! [this x] (set! next x))
+
+  (init! [this]
+    (set! next this)
+    (set! prev this)
+    this)
 
   (remove3! [this]
     (let [^DCell a next
@@ -123,18 +125,18 @@
                              rest reverse (map #(str (.-id ^DCell %))))))
          ")")))
 
+(defn dcell [id made-id!]
+  (cond-> (init! (DCell. id nil nil))
+    made-id! (made-id! id)))
+
 (defn seq->dcells [coll & [made-id!]]
-  (let [made-id! (or made-id! (constantly :skip))
-        current (DCell. (first coll) nil nil)
-        _ (made-id! (first coll) current)
+  (let [current (dcell (first coll) made-id!)
         final (reduce (fn [^DCell prev id]
-                        (let [cell (DCell. id prev current)]
-                          (made-id! id cell)
-                          (set-next! prev cell)
+                        (let [cell (dcell id made-id!)]
+                          (insert-after! prev cell)
                           cell))
                       current
                       (rest coll))]
-    (set-prev! current final)
     current))
 
 (defmethod print-method DCell [x writer]
@@ -150,7 +152,7 @@
 (defn cell-moves [start-str movecount]
   (let [^"[Lchouser.day23.DCell;" id->cell (make-array DCell 1000010)
         current (seq->dcells (complete-ring start-str)
-                             (fn [id cell] (aset id->cell id cell)))]
+                             (fn [cell id] (aset id->cell id cell) cell))]
     (loop [current current, movecount movecount]
       (when (pos? movecount)
         (let [subring (remove3! current)
