@@ -1,4 +1,4 @@
-(ns chouser.day04
+(ns chouser.day06
   (:require [clojure.string :as str]
             [chouser.day02 :refer [line-coll]]))
 
@@ -32,6 +32,7 @@ b" (str/split #"\n") rest))
 (assert (= 11 (sum-unique-count example)))
 
 (sum-unique-count (line-coll "resources/day06-input.txt"))
+;;=> 6430
 
 
 ;; Count letters included in every line of each group
@@ -51,3 +52,4 @@ b" (str/split #"\n") rest))
 (assert (= 6 (sum-shared-count example)))
 
 (sum-shared-count (line-coll "resources/day06-input.txt"))
+;;=> 3125
